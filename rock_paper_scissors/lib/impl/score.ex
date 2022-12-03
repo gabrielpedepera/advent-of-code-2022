@@ -1,9 +1,4 @@
 defmodule Impl.Score do
-  @doc """
-  "X" -> Rock  
-  "Y" -> Paper
-  "Z" -> Scissors
-  """
   @shape_values %{
     rock: 1,
     paper: 2,
@@ -13,10 +8,7 @@ defmodule Impl.Score do
   @dictionary_shapes %{
     "A" => :rock,
     "B" => :paper,
-    "C" => :scissors,
-    "X" => :rock,
-    "Y" => :paper,
-    "Z" => :scissors
+    "C" => :scissors
   }
 
   @results %{
@@ -25,18 +17,25 @@ defmodule Impl.Score do
     lost: 0
   }
 
-  def shape(shape) do
-    @shape_values[@dictionary_shapes[shape]]
+  @instructions %{
+    "X" => :lost,
+    "Y" => :draw,
+    "Z" => :won
+  }
+
+  def shape(oponent, instruction) do
+    movement = pick_movement(@dictionary_shapes[oponent], @instructions[instruction])
+    @shape_values[movement]
   end
 
-  def result(oponent, mine) do
-    result = check_result(oponent, mine)
+  def result(oponent, instruction) do
+    result = check_result(oponent, instruction)
     {result, @results[result]}
   end
 
-  defp check_result(oponent, mine) do
+  defp check_result(oponent, instruction) do
     oponent_move = @dictionary_shapes[oponent]
-    my_move = @dictionary_shapes[mine]
+    my_move = pick_movement(oponent_move, @instructions[instruction])
 
     case oponent_move do
       ^my_move -> :draw
@@ -44,27 +43,26 @@ defmodule Impl.Score do
     end
   end
 
-  defp check_combination({:rock, :paper}) do
-    :won
+  defp pick_movement(oponent, instruction) do
+    case instruction do
+       :draw -> oponent
+       :lost -> lost_movement(oponent)  
+       :won -> win_movement(oponent)  
+    end
   end
 
-  defp check_combination({:paper, :rock}) do
-    :lost
-  end
+  defp lost_movement(:paper), do: :rock
+  defp lost_movement(:rock), do: :scissors
+  defp lost_movement(:scissors), do: :paper
 
-  defp check_combination({:rock, :scissors}) do
-    :lost
-  end
+  defp win_movement(:paper), do: :scissors
+  defp win_movement(:rock), do: :paper
+  defp win_movement(:scissors), do: :rock
 
-  defp check_combination({:scissors, :rock}) do
-    :won
-  end
-
-  defp check_combination({:paper, :scissors}) do
-    :won
-  end
-
-  defp check_combination({:scissors, :paper}) do
-    :lost
-  end
+  defp check_combination({:rock, :paper}), do: :won
+  defp check_combination({:paper, :rock}), do: :lost
+  defp check_combination({:rock, :scissors}), do: :lost
+  defp check_combination({:scissors, :rock}), do: :won
+  defp check_combination({:paper, :scissors}), do: :won
+  defp check_combination({:scissors, :paper}), do: :lost
 end

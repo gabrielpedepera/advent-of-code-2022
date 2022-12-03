@@ -7,9 +7,9 @@ defmodule Impl.Game do
     GenServer.start_link(__MODULE__, score)
   end
 
-  def play(pid, {oponent, mine}) do
-    GenServer.cast(pid, {:shape, mine})
-    GenServer.call(pid, {:result, {oponent, mine}})
+  def play(pid, {oponent, instruction}) do
+    GenServer.cast(pid, {:shape, {oponent, instruction}})
+    GenServer.call(pid, {:result, {oponent, instruction}})
   end
 
   def score(pid) do
@@ -22,13 +22,13 @@ defmodule Impl.Game do
   end
 
   @impl true
-  def handle_cast({:shape, shape}, score) do
-    {:noreply, score + Score.shape(shape)}
+  def handle_cast({:shape, {oponent, instruction}}, score) do
+    {:noreply, score + Score.shape(oponent, instruction)}
   end
 
   @impl true
-  def handle_call({:result, {oponent, mine}}, _from, score) do
-    {result, match_score} = Score.result(oponent, mine)
+  def handle_call({:result, {oponent, instruction}}, _from, score) do
+    {result, match_score} = Score.result(oponent, instruction)
     {:reply, result, score + match_score }
   end
 
