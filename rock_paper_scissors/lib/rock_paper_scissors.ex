@@ -2,17 +2,21 @@ defmodule RockPaperScissors do
   @moduledoc """
   Documentation for `RockPaperScissors`.
   """
+  alias Impl.Game
+  alias Impl.InputParser
 
-  @doc """
-  Hello world.
+  def toal_score do
+    process()
+    |> Game.score()
+  end
 
-  ## Examples
+  defp process do
+    {:ok, pid} = Game.start_link()
 
-      iex> RockPaperScissors.hello()
-      :world
+    for match <- InputParser.list() do
+      Game.play(pid, match)
+    end
 
-  """
-  def hello do
-    :world
+    pid
   end
 end
