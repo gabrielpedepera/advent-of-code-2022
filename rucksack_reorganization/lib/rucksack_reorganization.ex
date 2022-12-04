@@ -3,16 +3,20 @@ defmodule RucksackReorganization do
   Documentation for `RucksackReorganization`.
   """
 
-  @doc """
-  Hello world.
+  alias Impl.Organizer
+  alias Impl.InputParser
 
-  ## Examples
+  def score do
+    organize()
+    |> Organizer.score()
+  end
 
-      iex> RucksackReorganization.hello()
-      :world
+  def organize do
+    {:ok, pid} = Organizer.start_link()
 
-  """
-  def hello do
-    :world
+    InputParser.list()
+    |> Enum.map(&(Organizer.check_duplicated(pid, &1)))
+
+    pid
   end
 end
