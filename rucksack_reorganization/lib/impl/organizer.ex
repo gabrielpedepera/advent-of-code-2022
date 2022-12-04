@@ -3,12 +3,16 @@ defmodule Impl.Organizer do
 
   alias Impl.Dictionary
 
-  def start_link(duplicated_items \\ []) do
-    GenServer.start_link(__MODULE__, duplicated_items)
+  def start_link(items \\ []) do
+    GenServer.start_link(__MODULE__, items)
   end
 
   def check_duplicated(pid, {compartment1, compartment2}) do
     GenServer.cast(pid, {:check_duplicated, {compartment1, compartment2}})
+  end
+
+  def check_badge(pid, {items1, items2, items3}) do
+    GenServer.cast(pid, {:check_badge, {items1, items2, items3}})
   end
 
   def score(pid) do
@@ -16,26 +20,37 @@ defmodule Impl.Organizer do
   end
 
   @impl true
-  def init(duplicated_items) do
-    {:ok, duplicated_items}
+  def init(items) do
+    {:ok, items}
   end
 
   @impl true
-  def handle_cast({:check_duplicated, {compartment1, compartment2}}, duplicated_items) do
-    intersected_items = compartment1 -- (compartment1 -- compartment2)
+  def handle_cast({:check_duplicated, {compartment1, compartment2}}, items) do
+    intersected_items = compartment1 -- compartment1 -- compartment2
 
-    {:noreply, duplicated_items ++ Enum.uniq(intersected_items)}
+    {:noreply, items ++ Enum.uniq(intersected_items)}
   end
 
   @impl true
-  def handle_call(:score, _from, duplicated_items) do
-    IO.inspect(length(duplicated_items), label: "length: ")
+  def handle_cast({:check_badge, {items1, items2, items3}}, items) do
+    items1 = String.codepoints(items1)
+    items2 = String.codepoints(items2)
+    items3 = String.codepoints(items3)
 
+    intersected_items =
+      items1
+      |> Enum.filter(fn elem -> Enum.member?(items2, elem) && Enum.member?(items3, elem) end)
+
+    {:noreply, items ++ Enum.uniq(intersected_items)}
+  end
+
+  @impl true
+  def handle_call(:score, _from, items) do
     score =
-      duplicated_items
+      items
       |> Enum.map(fn x -> Dictionary.get_value(String.to_atom(x)) end)
       |> Enum.sum()
 
-    {:reply, score, duplicated_items}
+    {:reply, score, items}
   end
 end
