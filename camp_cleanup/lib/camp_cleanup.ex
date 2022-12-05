@@ -6,6 +6,16 @@ defmodule CampCleanup do
   alias Impl.InputParser
   alias Impl.AssignmentPair
 
+  def count_full_overlaps do
+    {:ok, pid} = AssignmentPair.start_link()
+
+    for sections <- InputParser.sections_pairs_assigned() do
+      AssignmentPair.full_overlap?(pid, sections)
+    end
+
+    AssignmentPair.count_overlaps(pid)
+  end
+
   def count_overlaps do
     {:ok, pid} = AssignmentPair.start_link()
 

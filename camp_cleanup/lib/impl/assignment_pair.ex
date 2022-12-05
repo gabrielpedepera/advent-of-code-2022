@@ -11,6 +11,10 @@ defmodule Impl.AssignmentPair do
     GenServer.call(pid, :count_overlaps)
   end
 
+  def full_overlap?(pid, {section1, section2}) do
+    GenServer.cast(pid, {:full_overlap?, section1, section2})
+  end
+
   def overlap?(pid, {section1, section2}) do
     GenServer.cast(pid, {:overlap?, section1, section2})
   end
@@ -26,15 +30,24 @@ defmodule Impl.AssignmentPair do
   end
 
   @impl true
-  def handle_cast({:overlap?, section1, section2}, overlaps) do
+  def handle_cast({:full_overlap?, section1, section2}, overlaps) do
     overlapped =
-      case AssignmentSection.overlap?(Enum.to_list(section1), Enum.to_list(section2)) do
+      case AssignmentSection.full_overlap?(Enum.to_list(section1), Enum.to_list(section2)) do
         true -> true
-        false -> AssignmentSection.overlap?(Enum.to_list(section2), Enum.to_list(section1))
+        false -> AssignmentSection.full_overlap?(Enum.to_list(section2), Enum.to_list(section1))
       end
-    
+
     overlaps = if overlapped, do: overlaps + 1, else: overlaps
-    
+
+    {:noreply, overlaps}
+  end
+
+  def handle_cast({:overlap?, section1, section2}, overlaps) do
+    overlaps =
+      case AssignmentSection.overlap?(section1, section2) do
+        true -> overlaps + 1
+        false -> overlaps
+      end
 
     {:noreply, overlaps}
   end
