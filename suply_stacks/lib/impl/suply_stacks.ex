@@ -22,19 +22,17 @@ defmodule Impl.SuplyStacks do
   def handle_cast({:rearrange, instruction}, stacks) do
     {crates, from, to} = instruction
 
-    counter_stacks =
-      for _x <- 1..String.to_integer(crates), reduce: stacks do
-        acc ->
-          from_key = String.to_atom(from)
-          to_key = String.to_atom(to)
+    taken = Enum.take(stacks[String.to_atom(from)], String.to_integer(crates))
 
-          [from_head | from_tail] = acc[from_key]
-          to_list = [from_head | acc[to_key]]
+    to_list = List.flatten([taken | stacks[String.to_atom(to)]])
+    from_list = stacks[String.to_atom(from)] -- taken
 
-          %{acc | from_key => from_tail, to_key => to_list}
-      end
-
-    {:noreply, counter_stacks}
+    {:noreply,
+     %{
+       stacks
+       | String.to_atom(to) => to_list,
+         String.to_atom(from) => from_list
+     }}
   end
 
   @impl true

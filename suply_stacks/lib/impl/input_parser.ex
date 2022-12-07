@@ -38,7 +38,6 @@ defmodule Impl.InputParser do
             box = String.at(stack, find_position(x))
 
             if String.match?(box, ~r/[A-Z]/) do
-              # Map.put(acc, x, acc[x] ++ [box])
               Map.put(acc, x, [box | acc[x]])
             else
               acc
