@@ -11,10 +11,10 @@ defmodule TuningTrouble do
   end
 
   defp find_signal(signal_stream, index \\ 0) do
-    sequence_identifier = 4
-    first_fours_chars = Enum.take(signal_stream, sequence_identifier)
+    sequence_identifier = 14
+    sequence = Enum.take(signal_stream, sequence_identifier)
     
-    if sequence_identifier == length(Enum.uniq(first_fours_chars)) do
+    if sequence_identifier == length(Enum.uniq(sequence)) do
       sequence_identifier + index
     else
       [_head | tail] = signal_stream
